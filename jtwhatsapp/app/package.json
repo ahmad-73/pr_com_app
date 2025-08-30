@@ -1,0 +1,15 @@
+{
+  "name": "plain-js-chat-server",
+  "version": "1.0.0",
+  "description": "A simple WebSocket chat server for plain JS clients.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.x.x"  
+  }
+}

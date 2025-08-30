@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo WhatsApp</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #chat-container { border: 1px solid #02010d; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+        #message-input { width: calc(100% - 70px); padding: 8px; }
+        #send-button { width: 60px; padding: 8px; cursor: pointer; }
+        .message { margin-bottom: 5px; }
+        .self-message { text-align: right; color: rgb(179, 26, 15); }
+        .other-message { text-align: left; color: green; }
+    </style>
+</head>
+<body>
+    <h1>Demo Whats App</h1>
+    <div id="chat-container"></div>
+    <input type="text" id="username-input" placeholder="Enter your username" value="User1">
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const usernameInput = document.getElementById('username-input');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Replace with your WebSocket server address
+        const ws = new WebSocket('ws://54.238.23.225:8080'); 
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server');
+            displayMessage('System', 'Connected to chat.', 'system-message');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            displayMessage(data.username, data.message, data.username === usernameInput.value ? 'self-message' : 'other-message');
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+            displayMessage('System', 'Disconnected from chat.', 'system-message');
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            displayMessage('System', 'Connection error.', 'system-message');
+        };
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const username = usernameInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (username && message) {
+                const data = {
+                    username: username,
+                    message: message
+                };
+                ws.send(JSON.stringify(data));
+                messageInput.value = ''; // Clear input after sending
+            }
+        }
+
+        function displayMessage(username, message, className) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', className);
+            messageElement.innerHTML = `<strong>${username}:</strong> ${message}`;
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+        }
+    </script>
+</body>
+</html>
